@@ -1,0 +1,468 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+	       <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5">
+		     <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.7.3/nipplejs.js" charset="utf-8"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+	  .player{
+	    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: blue;
+    border-radius: 100%;
+	z-index:9999;
+	}
+	.player_you
+	{
+	  position: absolute;
+    width: 50px;
+    height: 50px;
+    background: red;
+    border-radius: 100%;
+	z-index:9999;
+	}
+	#map{
+	    background: url(http://elemisdesign.com/img/62/1.jpg);
+    background-repeat: repeat;
+    background-size: 600px
+	}
+	.burun_ilk_you{
+	width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12.5px 0 4.5px 25px;
+    border-color: transparent transparent transparent #ff0000;
+    margin-left: 40px;
+    margin-top: 13px;
+    -ms-transform: rotate(-8deg);
+    -webkit-transform: rotate(-8deg);
+    transform: rotate(-8deg);
+	z-index:99;
+}
+.burun_ilk_player{
+	width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12.5px 0 4.5px 25px;
+    border-color: transparent transparent transparent blue;
+    margin-left: 40px;
+    margin-top: 13px;
+    -ms-transform: rotate(-8deg);
+    -webkit-transform: rotate(-8deg);
+    transform: rotate(-8deg);
+	z-index:99;
+	
+}
+.yem_1
+{
+width:30px;
+background:yellow;
+height:30px;
+border-radius:100%;
+position:absolute;
+border:2px solid rebeccapurple;
+z-index:9999;
+}
+    </style>
+  </head>
+  <body style="overflow:hidden;cursor:crosshair" id="bodyler">
+    <div id="map" style="
+	margin:15px;
+      width: 5000px;
+    height: 2500px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    border: 1px solid #000000;
+	position: absolute;
+left: 0;
+right: 0;
+  ">
+
+
+
+<div class="krem" id="krem1" style="opacity:0.8;width:100px;height:100px;background:yellow;position:absolute;left:800px;top:200px;z-index:5"></div>
+<div class="krem" id="krem2" style="opacity:0.8;width:100px;height:100px;background:yellow;position:absolute;left:400px;top:200px;z-index:5"></div>
+  
+<div id="joystick" style="width:200px;height:150px;position:fixed;right:30px;bottom:50px;"><div>  
+	</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script>
+
+var mobil = 0;
+mobil = 1;
+if( $(window).width() < 100)
+{
+mobil = 1;
+}
+
+if(mobil == 1)
+{
+var JoystickL = nipplejs.create({
+            zone: document.getElementById('joystick'),
+            mode: 'static',
+            position: { left: '50%', top: '50%' },
+            color: 'green',
+            size: 150,
+			
+        });
+
+		
+				
+		}
+
+
+// socket.emit Gönderme socket.on alma
+   nickimbenim=prompt("Nick"); 
+
+  var socket = io();
+ 
+   $('#map').append("<div id='"+ nickimbenim +"' class='player_you'><div id='burun_you'  class='burun_ilk_you'></div></div>");
+     socket.emit('baglanankullanici',nickimbenim);
+
+  
+	var baglananlar = Array();
+      socket.on('ekle', function(id){
+  
+		if(baglananlar.indexOf(id) == "-1")
+		{
+	
+		if(id != nickimbenim)
+		{	
+		baglananlar.push(id);
+			   $('#map').append("<div id='"+ id +"' class='player'><div class='burun_ilk_player'></div></div>");
+		}
+		}
+		
+			  
+ 
+ });
+ 
+ 
+      socket.on('hizala', function(id,sol,yukari){
+  
+		
+		
+			  $("#" + id).css("left", sol + 'px');
+			   $("#" + id).css("top", yukari + 'px');
+			  
+ 
+ });
+ 
+     socket.on('yem_yukle', function(id,sol,yukari){
+  
+			$('#map').append("<div id='"+ id +"' class='yem_1'></div>");
+		
+		
+			  $("#" + id).css("left", sol + 'px');
+			   $("#" + id).css("top", yukari + 'px');
+			  
+ 
+ });
+ 
+ 
+ socket.on('kullanici_hizala', function(id,sol,ust,yon){
+  
+			if(id != nickimbenim)
+			{
+			sol +=1;
+			 $("#" + id).css("left", sol + 'px');
+			   $("#" + id).css("top", ust + 'px');			
+			   
+			   
+			   
+								 $("#" + id).css({
+						'-moz-transform': yon,
+						'-webkit-transform': yon,
+						'-o-transform': yon,
+						'-ms-transform': yon,
+						'transform': yon
+					});
+			}
+	});
+	
+	
+
+	
+ 
+  socket.on('nesne_sil', function(id,durum){
+  
+  if(durum == "oyuncu")
+  {
+  $("#" + id).hide('slow', function(){ $("#" + id).remove(); });
+			
+	}
+	else if(durum == "yem")
+  {
+  /* $( "#" + id ).toggle( "explode",200);
+		$( "#" + id ).remove();	*/
+		
+		$( "#" + id ).fadeOut(300, function(){ $(this).remove();});
+  }
+	
+			  
+ 
+ });
+ 
+
+ 
+if(mobil == 1)
+{
+ var mobil_rota = 360;
+ var position_x_mobil = 250;
+ var position_y_mobil = 602;
+ var git_x = 0;
+ var git_y = 0;
+ 
+
+				JoystickL.on('move', function (evt, data) {
+
+				
+					
+					var hesapla_derece =data.angle.degree
+					mobil_rota = hesapla_derece;
+					
+					
+												 var rotationValue = 'rotate(' + hesapla_derece + 'deg)';
+											
+
+												$(".player_you").css({
+												'-moz-transform': rotationValue,
+												'-webkit-transform': rotationValue,
+												'-o-transform': rotationValue,
+												'-ms-transform': rotationValue,
+												'transform': rotationValue
+											});
+											
+											
+											
+											if(data.position.x > 550)
+											{
+											git_x =10;
+											console.log("sag");
+										
+											}
+											else{
+											git_x = -10;
+											console.log("sol");
+											}
+											
+											if(data.position.y > 520)
+											{
+											
+											git_y = 10;
+											}
+											else{
+											git_y = -10;
+											}
+											
+									
+											
+											
+
+									
+								});
+
+								
+								 JoystickL.on('end', function (evt, data) {
+								  git_x = 0;
+								  git_y = 0;
+								 });
+
+
+				var loop = setInterval(function(){
+				  
+				  
+				  
+      
+
+	var pozisyansol = $("#" + nickimbenim).position().left;
+ var pozistantop = $("#" + nickimbenim).position().top;
+  if(git_x != 0)
+	   {
+	   console.log("BAAAAAAAAAAAAAAAAA");
+	    pozisyansol = pozisyansol + git_x;
+ pozistantop = pozistantop + git_y;
+ 
+ $("#" + nickimbenim).css("left", pozisyansol + 'px');
+			   $("#" + nickimbenim).css("top", pozistantop + 'px');
+	   }
+
+
+ 
+ var burun_left = $("#burun_you").offset().left;
+ var burun_ust = $("#burun_you").offset().top;
+ //socket.emit('posizyon_degis',nickimbenim,pozisyansol,pozistantop,mobil_rota,burun_left,burun_ust);
+ekranOrtala();
+
+		// YEM YENME İŞLEMİ
+
+				
+				},100);
+
+}
+else{
+  
+  // YÖN ALGILAMA //
+  function diff(x, y) {
+    var centerItem = $('.player_you'),
+        centerLoc = centerItem.offset();
+    var dx = x - (centerLoc.left + (centerItem.width() / 2));
+        dy = y - (centerLoc.top + (centerItem.height() / 2));
+    return Math.atan2(dy, dx) * (180 / Math.PI);
+}
+
+//--------------------------//
+
+
+// cache the selector
+var follower = $("#" + nickimbenim);
+  var random_top = Math.floor((Math.random() * 1000) + 1);
+   var random_left = Math.floor((Math.random() * 1000) + 1);
+var xp = random_top, yp = random_left;
+var senin_yonun = "0";
+
+// ----------------- //
+  
+var mouseX = 0, mouseY = 0, limitX = 5000-55, limitY = 2500-55;
+$(window).mousemove(function(e){
+
+ var x = e.pageX;
+    var y = e.pageY;
+
+    var myAngle = diff(x, y);
+    var rotationValue = 'rotate(' + myAngle + 'deg)';
+	senin_yonun = rotationValue;
+
+	    $(".player_you").css({
+        '-moz-transform': rotationValue,
+        '-webkit-transform': rotationValue,
+        '-o-transform': rotationValue,
+        '-ms-transform': rotationValue,
+        'transform': rotationValue
+    });
+	
+
+  var offset = $('#map').offset();
+   mouseX = Math.min(e.pageX - offset.left, limitX);
+   mouseY = Math.min(e.pageY - offset.top, limitY);
+   if (mouseX < 0) mouseX = 0;
+   if (mouseY < 0) mouseY = 0;
+
+
+
+
+ ekranOrtala();
+});
+
+
+/*
+var loop2 = setInterval(function(){
+	$( ".yem_1" ).each(function(  ) 
+	{
+		var yem_left_position = $(this).position().left;
+		var yem_top_position = $(this).position().top;
+		var yem_width = $(this).width();
+		var yem_height = $(this).height();
+		
+		var igne = $("#burun_you");
+		if((igne.offset().left + 10 > yem_left_position && igne.offset().left - 10 < yem_left_position + yem_width ) && (igne.offset().top + 10 > yem_top_position && igne.offset().top - 10 < yem_top_position + yem_height ))
+		{
+		
+		 socket.emit('yem_yendi',nickimbenim,this.id);
+	  $( "#" + this.id ).toggle( "explode",200);
+		this.remove();	
+		
+		}
+	
+	});
+	}, 100000);*/
+	
+var loop = setInterval(function(){
+
+
+
+    // change 12 to alter damping higher is slower
+
+	    xp += (mouseX - xp) / 150;
+    yp += (mouseY - yp) / 150;
+    follower.css({left:xp, top:yp});
+       
+	var pozisyansol = $("#" + nickimbenim).position().left;
+ var pozistantop = $("#" + nickimbenim).position().top;
+ var burun_left = $("#burun_you").offset().left;
+ var burun_ust = $("#burun_you").offset().top;
+ socket.emit('posizyon_degis',nickimbenim,pozisyansol,pozistantop,senin_yonun,burun_left,burun_ust);
+ekranOrtala();
+
+		// YEM YENME İŞLEMİ
+
+
+   
+
+}, 10);
+}
+
+function ekranOrtala()
+{
+ 
+ 
+     var width = $(window).width();
+    var height = $(window).height();
+
+var kendiplayer_height = $(".player_you").height();
+
+var hesapla_height = (height - kendiplayer_height) / 2;
+
+var nerde_height = $(".player_you").position().top;
+var artikson_height = nerde_height - hesapla_height;
+
+var kendiplayer_width = $(".player_you").width();
+
+var hesapla_width = (width - kendiplayer_width) / 2;
+
+var nerde_width = $(".player_you").position().left;
+var artikson_width = nerde_width - hesapla_width;
+
+
+$("body").scrollLeft(artikson_width);
+
+$("body").scrollTop(artikson_height);
+}
+
+
+$(document).keydown(function(event) {
+if (event.ctrlKey==true && (event.which == '61' || event.which == '107' || event.which == '173' || event.which == '109'  || event.which == '187'  || event.which == '189'  ) ) {
+        event.preventDefault();
+     }
+    // 107 Num Key  +
+    // 109 Num Key  -
+    // 173 Min Key  hyphen/underscor Hey
+    // 61 Plus key  +/= key
+});
+
+$(window).bind('mousewheel DOMMouseScroll', function (event) {
+       if (event.ctrlKey == true) {
+       event.preventDefault();
+       }
+});
+
+</script>
+
+
+
+
+  </body>
+</html>
